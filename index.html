@@ -1,0 +1,118 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', { 'packages': ['corechart'] });
+        google.charts.setOnLoadCallback(drawVisualization);
+
+        function linearRegression(x, y) {
+            x = x.map(element => parseInt(element))
+            y = y.map(element => parseInt(element))
+
+            var lr = {};
+
+            const sumReducer = (accumulator, currentValue) => accumulator + currentValue;
+
+            var meanX = x.reduce(sumReducer) / x.length
+            var meanY = y.reduce(sumReducer) / y.length
+
+            var variance = 0
+            x.forEach(element => {
+                variance += Math.pow(element - meanX, 2)
+            })
+
+            var covariance = 0
+            for (var i = 0; i < x.length; i++) {
+                var xPart = x[i] - meanX
+                var yPart = y[i] - meanY
+                covariance += xPart * yPart
+            }
+
+            // b1
+            lr['slope'] = covariance / variance
+
+            // b0
+            lr['intercept'] = meanY - lr['slope'] * meanX
+            lr['r2'] = 0
+
+            return lr;
+        };
+
+        function drawVisualization(inputData) {
+            if (inputData == undefined) {
+                inputData = []
+            }
+
+            var arr = [['Children', 'Liters', 'Average']]
+            inputData.forEach(element => {
+                element[1] = parseInt(element[1])
+                arr.push(element)
+            })
+            // Some raw data (not necessarily accurate)
+            /*var data = google.visualization.arrayToDataTable([
+                ['Children', 'Liters', 'Average'],
+                ['1', 1, 3],
+                ['2', 2, 6],
+                ['3', 4, 9],
+                ['4', 8, 12],
+                ['5', 16, 15]
+            ]);*/
+
+            console.log(arr)
+            var data = google.visualization.arrayToDataTable(arr)
+
+            var options = {
+                title: 'Simple Linear Regression',
+                vAxis: { title: 'Liters of Milk' },
+                hAxis: { title: 'Children in Family' },
+                seriesType: 'scatter',
+                series: { 1: { type: 'line' } }
+            };
+
+            var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+        }
+
+        function refreshGraph() {
+            var data = document.getElementById('ta').value
+            var splittedData = data.split("\n")
+            splittedData = splittedData.map(function (line) {
+                return line.split(",")
+            })
+            console.log(splittedData)
+
+            var x = []
+            var y = []
+
+            splittedData.forEach(element => {
+                x.push(element[0])
+                y.push(element[1])
+            });
+
+            console.log(x)
+            console.log(y)
+
+            var lr = linearRegression(x, y)
+            console.log(lr)
+
+            splittedData.forEach(element => {
+                var xElement = element[0]
+                console.log('y = ' + lr.slope + ' * ' + xElement + ' + ' + lr.intercept)
+                element.push(xElement * lr.slope + lr.intercept)
+            });
+
+            console.log(splittedData)
+
+            drawVisualization(splittedData)
+        }
+    </script>
+</head>
+
+<body>
+    <label for="ta"></label>
+    <textarea oninput="refreshGraph()" name="ta" id="ta" cols="30" rows="10"></textarea>
+    <div id="chart_div" style="width: 900px; height: 500px;"></div>
+</body>
+
+</html>
