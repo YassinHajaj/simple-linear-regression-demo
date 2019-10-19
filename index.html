@@ -65,7 +65,9 @@
             var options = {
                 title: 'Simple Linear Regression',
                 vAxis: { title: 'Liters of Milk' },
-                hAxis: { title: 'Children in Family' },
+                hAxis: {
+                    title: 'Children in Family',
+                },
                 seriesType: 'scatter',
                 series: { 1: { type: 'line' } }
             };
@@ -90,17 +92,38 @@
                 y.push(element[1])
             });
 
+            var xInts = x.map((element) => parseInt(element))
+            var yInts = y.map((element) => parseInt(element))
+
             console.log(x)
             console.log(y)
 
             var lr = linearRegression(x, y)
-            console.log(lr)
+            for (var i = 0; i <= Math.max.apply(Math, xInts); i++) {
+                if (xInts.includes(i)) {
+                    console.log(xInts + "includes" + i)
+                    var existing = splittedData.find((element) => element[0] == i)
+                    existing.push(existing[0] * lr.slope + lr.intercept)
+                }
+                var point = i * lr.slope + lr.intercept
+                splittedData.push([i, NaN, point])
+            }
+
+            splittedData.sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
+
+            document.getElementById("formulaInput").value = 'y = ' + Number(lr.slope).toFixed(2) + ' * x + ' + Number(lr.intercept).toFixed(2)
+
+
+
+
+/*             console.log(lr)
 
             splittedData.forEach(element => {
                 var xElement = element[0]
+                document.getElementById("formulaInput").value = 'y = ' + Number(lr.slope).toFixed(2) + ' * x + ' + Number(lr.intercept).toFixed(2)
                 console.log('y = ' + lr.slope + ' * ' + xElement + ' + ' + lr.intercept)
                 element.push(xElement * lr.slope + lr.intercept)
-            });
+            }); */
 
             console.log(splittedData)
 
@@ -113,6 +136,8 @@
     <label for="ta"></label>
     <textarea oninput="refreshGraph()" name="ta" id="ta" cols="30" rows="10"></textarea>
     <div id="chart_div" style="width: 900px; height: 500px;"></div>
+    <label for="formula">y = mx * b</label>
+    <input id="formulaInput" type="text" width="100" disabled>
 </body>
 
 </html>
