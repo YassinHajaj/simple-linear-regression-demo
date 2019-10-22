@@ -1,4 +1,17 @@
 <html>
+<!-- 
+1,2
+2,4
+3,6
+4,8
+5,10
+----
+1,2
+2,4
+3,8
+4,16
+5,32
+-->
 
 <head>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -49,15 +62,6 @@
                 element[1] = parseInt(element[1])
                 arr.push(element)
             })
-            // Some raw data (not necessarily accurate)
-            /*var data = google.visualization.arrayToDataTable([
-                ['Children', 'Liters', 'Average'],
-                ['1', 1, 3],
-                ['2', 2, 6],
-                ['3', 4, 9],
-                ['4', 8, 12],
-                ['5', 16, 15]
-            ]);*/
 
             console.log(arr)
             var data = google.visualization.arrayToDataTable(arr)
@@ -99,31 +103,47 @@
             console.log(y)
 
             var lr = linearRegression(x, y)
+            var ssr = 0;
+            var sst = 0;
+
+            const sumReducer = (accumulator, currentValue) => accumulator + currentValue;
+
+            var meanX = xInts.reduce(sumReducer) / x.length
+            var meanY = yInts.reduce(sumReducer) / y.length
+
             for (var i = 0; i <= Math.max.apply(Math, xInts); i++) {
+                var point = i * lr.slope + lr.intercept
                 if (xInts.includes(i)) {
                     console.log(xInts + "includes" + i)
                     var existing = splittedData.find((element) => element[0] == i)
                     existing.push(existing[0] * lr.slope + lr.intercept)
+                    // ssr
+                    ssr += Math.pow(yInts[xInts.indexOf(i)] - point, 2)
+                    // sst
+                    sst += Math.pow(yInts[xInts.indexOf(i)] - meanY, 2)
                 }
-                var point = i * lr.slope + lr.intercept
                 splittedData.push([i, NaN, point])
             }
 
+            console.log({ sst, ssr })
+            console.log((sst - ssr) / sst)
+
             splittedData.sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
 
-            document.getElementById("formulaInput").value = 'y = ' + Number(lr.slope).toFixed(2) + ' * x + ' + Number(lr.intercept).toFixed(2)
+            document.getElementById("formula").value = 'y = ' + Number(lr.slope).toFixed(2) + ' * x + ' + Number(lr.intercept).toFixed(2)
+            document.getElementById("rsquared").value = (sst - ssr) / sst
 
 
 
 
-/*             console.log(lr)
-
-            splittedData.forEach(element => {
-                var xElement = element[0]
-                document.getElementById("formulaInput").value = 'y = ' + Number(lr.slope).toFixed(2) + ' * x + ' + Number(lr.intercept).toFixed(2)
-                console.log('y = ' + lr.slope + ' * ' + xElement + ' + ' + lr.intercept)
-                element.push(xElement * lr.slope + lr.intercept)
-            }); */
+            /*             console.log(lr)
+            
+                        splittedData.forEach(element => {
+                            var xElement = element[0]
+                            document.getElementById("formulaInput").value = 'y = ' + Number(lr.slope).toFixed(2) + ' * x + ' + Number(lr.intercept).toFixed(2)
+                            console.log('y = ' + lr.slope + ' * ' + xElement + ' + ' + lr.intercept)
+                            element.push(xElement * lr.slope + lr.intercept)
+                        }); */
 
             console.log(splittedData)
 
@@ -137,7 +157,9 @@
     <textarea oninput="refreshGraph()" name="ta" id="ta" cols="30" rows="10"></textarea>
     <div id="chart_div" style="width: 900px; height: 500px;"></div>
     <label for="formula">y = mx * b</label>
-    <input id="formulaInput" type="text" width="100" disabled>
+    <input id="formula" type="text" width="100" disabled>
+    <label for="rsquared">R²</label>
+    <input id="rsquared" type="text" width="100" disabled>
 </body>
 
 </html>
