@@ -20,35 +20,14 @@
         google.charts.setOnLoadCallback(drawVisualization);
 
         function linearRegression(x, y) {
-            x = x.map(element => parseInt(element))
-            y = y.map(element => parseInt(element))
-
-            var lr = {};
-
-            const sumReducer = (accumulator, currentValue) => accumulator + currentValue;
-
-            var meanX = x.reduce(sumReducer) / x.length
-            var meanY = y.reduce(sumReducer) / y.length
-
-            var variance = 0
-            x.forEach(element => {
-                variance += Math.pow(element - meanX, 2)
-            })
-
-            var covariance = 0
-            for (var i = 0; i < x.length; i++) {
-                var xPart = x[i] - meanX
-                var yPart = y[i] - meanY
-                covariance += xPart * yPart
-            }
-
-            // b1
-            lr['slope'] = covariance / variance
-
-            // b0
-            lr['intercept'] = meanY - lr['slope'] * meanX
-            lr['r2'] = 0
-
+            // Parsing dataset to integer 
+            // Creating the simple linear regression object 
+            // Write the sumreducer
+            // Calculate the means of x and y
+            // Calculate the variance
+            // Calculate the covariance
+            // Calculate the slope lr['slope']
+            // Calculate the y-intercept (bias) lr['intercept']
             return lr;
         };
 
@@ -117,36 +96,15 @@
                     console.log(xInts + "includes" + i)
                     var existing = splittedData.find((element) => element[0] == i)
                     existing.push(existing[0] * lr.slope + lr.intercept)
-                    // ssr
-                    ssr += Math.pow(yInts[xInts.indexOf(i)] - point, 2)
-                    // sst
-                    sst += Math.pow(yInts[xInts.indexOf(i)] - meanY, 2)
+                    // Calculate the SST
+                    // Calculate the SSR
                 }
                 splittedData.push([i, NaN, point])
             }
-
-            console.log({ sst, ssr })
-            console.log((sst - ssr) / sst)
-
             splittedData.sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
-
-            document.getElementById("formula").value = 'y = ' + Number(lr.slope).toFixed(2) + ' * x + ' + Number(lr.intercept).toFixed(2)
-            document.getElementById("rsquared").value = (sst - ssr) / sst
-
-
-
-
-            /*             console.log(lr)
             
-                        splittedData.forEach(element => {
-                            var xElement = element[0]
-                            document.getElementById("formulaInput").value = 'y = ' + Number(lr.slope).toFixed(2) + ' * x + ' + Number(lr.intercept).toFixed(2)
-                            console.log('y = ' + lr.slope + ' * ' + xElement + ' + ' + lr.intercept)
-                            element.push(xElement * lr.slope + lr.intercept)
-                        }); */
-
-            console.log(splittedData)
-
+            document.getElementById("formula").value = 'y = ' + Number(lr.slope).toFixed(2) + ' * x + ' + Number(lr.intercept).toFixed(2)
+            // todo document.getElementById("rsquared").value
             drawVisualization(splittedData)
         }
     </script>
